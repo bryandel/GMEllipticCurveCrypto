@@ -1516,6 +1516,10 @@ static uint64_t Curve_n_384[6] = {0xECEC196ACCC52973, 0x581A0DB248B0A77A, 0xC763
 
     // Prepare the public key
     uint8_t l_other_public[_bytes + 1];
+    
+    // Compress public key if uncompressed
+    otherPublicKey = [self compressPublicKey:otherPublicKey];
+    
     if ([otherPublicKey length] != _bytes + 1) {
         [NSException raise:@"Invalid Key" format:@"Public key %@ is invalid", otherPublicKey];
     }
@@ -1769,7 +1773,10 @@ static uint64_t Curve_n_384[6] = {0xECEC196ACCC52973, 0x581A0DB248B0A77A, 0xC763
     BOOL compressedPublicKey = (bytes[0] != (uint8_t)0x04);
 
     // Ensure the key is compressed (we only store compressed keys internally)
-    publicKey = [self compressPublicKey:publicKey];
+    if (!compressedPublicKey) {
+        publicKey = [self compressPublicKey:publicKey];
+        compressedPublicKey = YES;
+    }
 
     // If the private key has already been set, and it doesn't match, complain
     if (_privateKey && ![publicKey isEqual:_publicKey]) {
