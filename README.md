@@ -105,6 +105,14 @@ NSLog(@"Shared secrets equal? %d", [aliceSharedSecret isEqualToData:bobSharedSec
 
 ```
 
+### Set Public & Private keys to zeroes
+
+```objective-c
+GMEllipticCurveCrypto *crypto = [GMEllipticCurveCrypto generateKeyPairForCurve:
+                                                         GMEllipticCurveSecp192r1];
+[crypto clearKeys];
+```
+
 # Convenience functions
 
 ### Automatically detects curve and sets up the private or public key
