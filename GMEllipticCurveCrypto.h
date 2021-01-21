@@ -90,6 +90,11 @@ typedef enum GMEllipticCurve {
 - (id)initWithCurve: (GMEllipticCurve)curve;
 
 /**
+*  Replaces with zeroes the contents of privateKey and publicKey
+*/
+- (void)clearKeys;
+
+/**
  *  The length of the curve in bits.
  */
 @property (nonatomic, readonly) int bits;

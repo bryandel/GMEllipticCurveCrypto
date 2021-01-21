@@ -1354,7 +1354,8 @@ static uint64_t Curve_n_384[6] = {0xECEC196ACCC52973, 0x581A0DB248B0A77A, 0xC763
 @interface GMEllipticCurveCrypto () {
     int _bytes, _numDigits;
     uint64_t *_curve_p, *_curve_b, *_curve_Gx, *_curve_Gy, *_curve_n;
-    NSData *_publicKey;
+    NSMutableData *_publicKey;
+    NSMutableData *_privateKey;
 }
 
 @end
@@ -1494,8 +1495,8 @@ static uint64_t Curve_n_384[6] = {0xECEC196ACCC52973, 0x581A0DB248B0A77A, 0xC763
         
     BOOL success = ecc_make_key(l_public, l_private, _numDigits, _curve_p, _curve_n, _curve_Gx, _curve_Gy);
     
-    _publicKey = [NSData dataWithBytes:l_public length:_bytes + 1];
-    _privateKey = [NSData dataWithBytes:l_private length:_bytes];
+    _publicKey = [NSMutableData dataWithBytes:l_public length:_bytes + 1];
+    _privateKey = [NSMutableData dataWithBytes:l_private length:_bytes];
     
     return success;
 }
@@ -1716,6 +1717,10 @@ static uint64_t Curve_n_384[6] = {0xECEC196ACCC52973, 0x581A0DB248B0A77A, 0xC763
     return nil;
 }
 
+- (NSData*)privateKey {
+    return [NSData dataWithData:_privateKey];
+}
+
 - (NSString*)privateKeyBase64 {
     return [_privateKey base64EncodedStringWithOptions:0];
 }
@@ -1732,8 +1737,8 @@ static uint64_t Curve_n_384[6] = {0xECEC196ACCC52973, 0x581A0DB248B0A77A, 0xC763
         [NSException raise:@"Key mismatch" format:@"Private key %@ does not match public key %@", privateKey, _publicKey];
     }
     
-    _publicKey = checkPublicKey;
-    _privateKey = privateKey;
+    _publicKey = [NSMutableData dataWithData:checkPublicKey];
+    _privateKey = [NSMutableData dataWithData:privateKey];
 }
 
 
@@ -1749,7 +1754,7 @@ static uint64_t Curve_n_384[6] = {0xECEC196ACCC52973, 0x581A0DB248B0A77A, 0xC763
 
 - (NSData*)publicKey {
     if (_compressedPublicKey) {
-        return _publicKey;
+        return [NSData dataWithData:_publicKey];
     }
     return [self decompressPublicKey:_publicKey];
 }
@@ -1772,7 +1777,7 @@ static uint64_t Curve_n_384[6] = {0xECEC196ACCC52973, 0x581A0DB248B0A77A, 0xC763
     }
 
     _compressedPublicKey = compressedPublicKey;
-    _publicKey = publicKey;
+    _publicKey = [NSMutableData dataWithData:publicKey];
 }
 
 
@@ -1785,5 +1790,9 @@ static uint64_t Curve_n_384[6] = {0xECEC196ACCC52973, 0x581A0DB248B0A77A, 0xC763
     return [NSString stringWithFormat:@"<GMEllipticCurveCrypto algorithm=%@ publicKey=%@ privateKey=%@>", _name, self.publicKeyBase64, self.privateKeyBase64];
 }
 
+- (void)clearKeys {
+    [_publicKey resetBytesInRange:NSMakeRange(0, [_publicKey length])];
+    [_privateKey resetBytesInRange:NSMakeRange(0, [_privateKey length])];
+}
 
 @end
